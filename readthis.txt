@@ -1,0 +1,7 @@
+install pygame and numpy before usage 
+A and D rotate in ZW
+W and S rotate in XW
+Z and C rotate in YW
+arrow keys rotate in 3d
+hold Q while holding A, D, W, S, Z or C to get their respective double rotations
+HAVE FUN :)
