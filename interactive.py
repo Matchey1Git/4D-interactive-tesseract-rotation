@@ -108,15 +108,24 @@ def rotate_3d_y(point, angle):
     return rot @ point
 
 def rotate_3d_x(point, angle):
-    #initial x rotation
+    # initial x rotation
     rot = np.matrix([
         [1, 0, 0],
         [0, math.cos(angle), -math.sin(angle)],
         [0, math.sin(angle), math.cos(angle)]
     ])
     return rot @ point
+# Actual edge logic
+def generate_edges(points): 
+    edges = []
+    for i in range(len(points)):
+        for j in range(i + 1, len(points)):
+            diff = np.abs(points[i] - points[j]).flatten()
+            if np.count_nonzero(diff) == 1 and np.all((diff == 2) | (diff == 0)):
+                edges.append((i, j))
+    return edges
 
-# projection
+# projection from 4D down to 2D
 def project_point(point4d, angle3d_x=0.8, angle3d_y=0.6):
     # 4D to 3D
     distance = 3
@@ -154,6 +163,7 @@ angle_yz = 0
 angle_yw_xz = 0
 angle_xw_yz = 0
 angle_xz = 0
+edges = generate_edges(points_4d)
 while True:
     clock.tick(60)
     screen.fill(BLACK)
@@ -167,7 +177,7 @@ while True:
                 pygame.quit()
                 exit()
     keys = pygame.key.get_pressed()
-
+    # the interactive part
     if keys[pygame.K_d]:
         if not (keys[pygame.K_q]):
             angle_zw +=0.02
@@ -208,6 +218,7 @@ while True:
         else:
             angle_yw_xz -= 0.02
     projected_points = []
+    # brace yourself for this messy code
     for point in points_4d:
         rotated4d = rotate_4d_zw(point, angle_zw)
         rotated4d = rotate_4d_xw(rotated4d, angle_xw)
@@ -223,12 +234,9 @@ while True:
         projected_points.append((x, y))
         pygame.draw.circle(screen, GREEN, (x, y), scale//50)
 
-    # the uh
-    for i in range(16):
-        for j in range(i+1, 16):
-            diff = np.abs(np.array(points_4d[i]) - np.array(points_4d[j])) # check if points are one unit away
-            if np.count_nonzero(diff) == 1 and np.all((diff == 2) | (diff == 0)):
-                connect_points(i, j, projected_points)
+    # Edge connection
+    for i,j in edges:
+        connect_points(i, j, projected_points)
 
     
     pygame.display.update()
